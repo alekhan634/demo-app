@@ -13,7 +13,15 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonarqube') {
-                    sh "${SCANNER_HOME}/bin/sonar-scanner"
+                    sh '''
+                        docker run --rm \
+                          --network container:sonarqube-sonarqube-1 \
+                          -v "$WORKSPACE:/usr/src" \
+                          -w /usr/src \
+                          sonarsource/sonar-scanner-cli \
+                          -Dsonar.host.url=http://localhost:9000 \
+                          -Dsonar.login=$SONAR_AUTH_TOKEN
+                    '''
                 }
             }
         }
