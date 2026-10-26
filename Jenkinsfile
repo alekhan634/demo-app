@@ -1,20 +1,18 @@
 pipeline {
     agent any
     options { timestamps() }
-    environment { SCANNER_HOME = tool 'sonar-scanner' }
+    environment { 
+        SCANNER_HOME = tool 'sonar-scanner' 
+    }
     stages {
-        stage('Checkout') { steps { checkout scm } }
         stage('Setup') {
             steps {
-                sh 'python3 -m venv venv'
-                sh './venv/bin/pip install --upgrade pip'
-                sh './venv/bin/pip install -r requirements.txt'
+                sh 'python3 -m pip install --user pytest pytest-cov requests pyyaml'
             }
         }
-        stage('Build') { steps { sh './venv/bin/python -m py_compile app.py' } }
         stage('Test') {
             steps {
-                sh './venv/bin/pytest --junitxml=result.xml --cov=app --cov-report=xml:coverage.xml'
+                sh 'python3 -m pytest --junitxml=result.xml --cov=app --cov-report=xml:coverage.xml'
             }
         }
         stage('SonarQube Analysis') {
